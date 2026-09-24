@@ -44,8 +44,21 @@ export default function Login({ setUser }) {
   };
 
   return (
-    <div className="min-h-screen bg-paper flex items-center py-12 px-4 sm:px-6 lg:px-8 antialiased text-ink">
-      <div className="w-full max-w-4xl mx-auto grid gap-10 md:grid-cols-2 md:items-start">
+    <div className="min-h-screen bg-paper antialiased text-ink lg:flex">
+      <div className="lg:w-1/2 lg:h-screen lg:sticky lg:top-0">
+        <img
+          src="/images/family-newborn.jpg"
+          alt="Parents smiling at their sleeping newborn"
+          width="1100"
+          height="1650"
+          loading="eager"
+          decoding="async"
+          className="block h-56 sm:h-72 w-full object-cover object-[center_25%] lg:h-full lg:object-[center_8%]"
+        />
+      </div>
+
+      <div className="bg-paper lg:w-1/2 lg:min-h-screen flex items-center py-10 px-4 sm:px-6 lg:px-12">
+        <div className="w-full max-w-md mx-auto">
         <div>
           <div className="text-scrub font-bold text-xl">Cara</div>
           <h1 className="text-3xl font-bold text-ink leading-tight mt-6">
@@ -56,7 +69,7 @@ export default function Login({ setUser }) {
           </p>
         </div>
 
-        <div className="bg-white border border-rule rounded-md">
+        <div className="bg-white border border-rule rounded-md mt-8">
           <div className="px-5 py-4">
             <h2 className="text-base font-bold text-ink">Sign in to the demo</h2>
             <p className="text-sm text-ink-soft mt-1">Choose a role. These are test accounts with made-up patients.</p>
@@ -109,6 +122,19 @@ export default function Login({ setUser }) {
               {loadingRole === 'Admin' ? 'Signing in…' : 'Sign in'}
             </span>
           </button>
+        </div>
+
+        <p className="text-xs text-ink-faint mt-8">
+          Photo: Dream_ maKkerzz on{' '}
+          <a
+            href="https://www.pexels.com/photo/joyful-indian-family-with-newborn-baby-portrait-30012200/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline"
+          >
+            Pexels
+          </a>
+        </p>
         </div>
       </div>
     </div>
