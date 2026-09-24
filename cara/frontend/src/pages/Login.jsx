@@ -47,13 +47,13 @@ export default function Login({ setUser }) {
     <div className="min-h-screen bg-paper antialiased text-ink lg:flex">
       <div className="lg:w-1/2 lg:h-screen lg:sticky lg:top-0">
         <img
-          src="/images/family-newborn.jpg"
-          alt="Parents smiling at their sleeping newborn"
-          width="1100"
-          height="1650"
+          src="/images/postnatal-ward.jpg"
+          alt="A nurse brings a newborn to his mother on the postnatal ward"
+          width="1600"
+          height="1067"
           loading="eager"
           decoding="async"
-          className="block h-56 sm:h-72 w-full object-cover object-[center_25%] lg:h-full lg:object-[center_8%]"
+          className="block h-56 sm:h-72 w-full object-cover object-[center_45%] lg:h-full lg:object-[42%_center]"
         />
       </div>
 
@@ -125,9 +125,9 @@ export default function Login({ setUser }) {
         </div>
 
         <p className="text-xs text-ink-faint mt-8">
-          Photo: Dream_ maKkerzz on{' '}
+          Photo: Jonathan Borba on{' '}
           <a
-            href="https://www.pexels.com/photo/joyful-indian-family-with-newborn-baby-portrait-30012200/"
+            href="https://www.pexels.com/photo/a-woman-in-a-white-coat-holding-a-baby-in-a-hospital-bed-19357673/"
             target="_blank"
             rel="noopener noreferrer"
             className="underline"
