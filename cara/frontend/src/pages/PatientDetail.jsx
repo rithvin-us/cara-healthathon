@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { patientApi, familyApi, visitApi } from '../api/client';
-import { User, Phone, Globe, Calendar, Users, ShieldCheck, ShieldOff, Plus, MessageSquare, ArrowLeft, CheckCircle2, AlertCircle, Clock } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
+import { visitLabel } from '../labels';
 
 export default function PatientDetail() {
   const { id } = useParams();
@@ -37,7 +38,7 @@ export default function PatientDetail() {
       await familyApi.updateConsent(familyId, !currentConsent);
       loadDetail();
     } catch (err) {
-      alert('Error updating consent: ' + (err.response?.data?.detail || err.message));
+      alert("Couldn't update consent: " + (err.response?.data?.detail || err.message));
     }
   };
 
@@ -57,217 +58,202 @@ export default function PatientDetail() {
       setFmContact('');
       loadDetail();
     } catch (err) {
-      setFmError(err.response?.data?.detail || 'Failed to add family member.');
+      setFmError(err.response?.data?.detail || "Couldn't add this family member. Check the details and try again.");
     }
   };
 
   const handleManualNudge = async (visitId) => {
     try {
       const res = await visitApi.manualNudge(visitId);
-      alert(`Nudge re-triggered! Nudge logs created: ${res.data.length}`);
+      alert(`Reminder sent to ${res.data.length} ${res.data.length === 1 ? 'number' : 'numbers'}.`);
       loadDetail();
     } catch (err) {
-      alert('Nudge error: ' + (err.response?.data?.detail || err.message));
+      alert("Couldn't send reminder: " + (err.response?.data?.detail || err.message));
     }
   };
 
   if (loading) {
     return (
-      <div className="text-center py-16">
-        <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-emerald-600 border-t-transparent"></div>
-        <p className="mt-2 text-sm text-slate-500">Loading patient details...</p>
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <p className="text-sm text-ink-soft">Loading…</p>
       </div>
     );
   }
 
-  if (!data) return <div className="text-center py-12 text-slate-500">Patient record not found.</div>;
+  if (!data) {
+    return (
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <p className="text-sm text-ink-soft">We couldn't find this mother's record. Go back to the follow-up list and open her again.</p>
+      </div>
+    );
+  }
 
   const { patient, active_plan, family_members, nudges } = data;
 
+  const riskNames = {
+    hypertension: 'High blood pressure',
+    hemorrhage_history: 'History of heavy bleeding (PPH)',
+    anemia: 'Severe anaemia',
+    c_section: 'C-section',
+    other: 'Other risk',
+  };
+
+  const inputClass =
+    'mt-1 block w-full text-sm border border-rule-strong rounded px-3 py-2 bg-white focus:outline-none focus:border-scrub focus:ring-1 focus:ring-scrub';
+
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8 space-y-6">
-      {/* Top Bar */}
-      <div>
-        <Link to="/worklist" className="inline-flex items-center text-xs font-semibold text-emerald-700 hover:text-emerald-800 mb-2">
-          <ArrowLeft className="h-3.5 w-3.5 mr-1" />
-          <span>Back to Worklist</span>
-        </Link>
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">{patient.name}</h1>
-          <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">
-            Active Patient Record #{patient.patient_id}
-          </span>
-        </div>
-      </div>
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <Link
+        to="/worklist"
+        className="inline-flex items-center text-scrub text-sm font-semibold hover:underline underline-offset-2 mb-4"
+      >
+        <ArrowLeft className="h-4 w-4 mr-1" />
+        <span>Back to follow-ups</span>
+      </Link>
 
-      {/* Patient Header Card */}
-      <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
-        <div>
-          <span className="text-xs text-slate-400 font-semibold block uppercase">Contact Number</span>
-          <span className="font-bold text-slate-900 flex items-center space-x-1 mt-0.5">
-            <Phone className="h-4 w-4 text-slate-400 mr-1" />
-            {patient.contact_number}
-          </span>
-        </div>
+      <h1 className="text-2xl font-bold text-ink">{patient.name}</h1>
+      <p className="text-sm text-ink-soft mt-1">
+        Delivered on {patient.delivery_date}, discharged on {patient.discharge_date}. Speaks {patient.preferred_language}. Phone {patient.contact_number}.
+      </p>
 
-        <div>
-          <span className="text-xs text-slate-400 font-semibold block uppercase">Preferred Language</span>
-          <span className="font-bold text-slate-900 flex items-center space-x-1 mt-0.5">
-            <Globe className="h-4 w-4 text-slate-400 mr-1" />
-            {patient.preferred_language}
-          </span>
-        </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-x-10">
+        <div className="lg:col-span-2">
+          <section className="border-t border-rule pt-6 mt-8">
+            <h2 className="text-base font-bold text-ink">Checkup schedule</h2>
 
-        <div>
-          <span className="text-xs text-slate-400 font-semibold block uppercase">Delivery Date</span>
-          <span className="font-bold text-slate-900 flex items-center space-x-1 mt-0.5">
-            <Calendar className="h-4 w-4 text-slate-400 mr-1" />
-            {patient.delivery_date}
-          </span>
-        </div>
+            {!active_plan || active_plan.visits.length === 0 ? (
+              <p className="text-sm text-ink-soft mt-3">No checkups are scheduled. Create a discharge plan to set up her visits.</p>
+            ) : (
+              <ol className="mt-4 border-l-2 border-rule">
+                {[...active_plan.visits]
+                  .sort((a, b) => String(a.due_date).localeCompare(String(b.due_date)))
+                  .map((v) => {
+                    let status;
+                    if (v.status === 'completed') {
+                      status = <span className="text-ok font-semibold">Visited</span>;
+                    } else if (v.status === 'overdue') {
+                      status = <span className="text-late font-semibold">Late</span>;
+                    } else if (v.status === 'due_today') {
+                      status = <span className="text-soon font-semibold">Due today</span>;
+                    } else {
+                      status = <span className="text-ink-soft">Upcoming</span>;
+                    }
 
-        <div>
-          <span className="text-xs text-slate-400 font-semibold block uppercase">Discharge Date</span>
-          <span className="font-bold text-slate-900 flex items-center space-x-1 mt-0.5">
-            <Calendar className="h-4 w-4 text-slate-400 mr-1" />
-            {patient.discharge_date}
-          </span>
-        </div>
-      </div>
+                    return (
+                      <li key={v.visit_id} className="relative pl-5 py-3 border-b border-rule last:border-0">
+                        <span className="absolute -left-[5px] top-5 h-2 w-2 bg-rule-strong" aria-hidden="true"></span>
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="text-sm">
+                            <div className="font-semibold text-ink">{visitLabel(v.visit_type)}</div>
+                            <div className="text-[13px] text-ink-soft mt-0.5">
+                              Due {v.due_date}. {status}
+                            </div>
+                            {v.note && <div className="text-[13px] text-ink-soft mt-1">Note: {v.note}</div>}
+                          </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Visit Schedule Timeline (2 Cols) */}
-        <div className="lg:col-span-2 bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
-          <h3 className="text-base font-bold text-slate-900 border-b border-slate-100 pb-3 flex items-center justify-between">
-            <span>Postnatal Visit Calendar</span>
-            {active_plan && active_plan.risk_flags.length > 0 && (
-              <span className="text-xs font-semibold px-2.5 py-0.5 bg-rose-100 text-rose-800 rounded">
-                Risk Override Applied
-              </span>
+                          <button
+                            onClick={() => handleManualNudge(v.visit_id)}
+                            className="shrink-0 text-scrub text-sm font-semibold hover:underline underline-offset-2"
+                          >
+                            Send reminder
+                          </button>
+                        </div>
+                      </li>
+                    );
+                  })}
+              </ol>
             )}
-          </h3>
-
-          {!active_plan || active_plan.visits.length === 0 ? (
-            <p className="text-sm text-slate-500">No scheduled visits on file.</p>
-          ) : (
-            <div className="space-y-3">
-              {active_plan.visits.map((v) => {
-                let statusBadge = null;
-                if (v.status === 'completed') {
-                  statusBadge = <span className="px-2 py-0.5 rounded text-xs font-bold bg-emerald-100 text-emerald-800">Completed</span>;
-                } else if (v.status === 'overdue') {
-                  statusBadge = <span className="px-2 py-0.5 rounded text-xs font-bold bg-red-100 text-red-800">Overdue</span>;
-                } else if (v.status === 'due_today') {
-                  statusBadge = <span className="px-2 py-0.5 rounded text-xs font-bold bg-amber-100 text-amber-800">Due Today</span>;
-                } else {
-                  statusBadge = <span className="px-2 py-0.5 rounded text-xs font-bold bg-slate-100 text-slate-600">Upcoming</span>;
-                }
-
-                return (
-                  <div key={v.visit_id} className="p-4 rounded-lg border border-slate-200 bg-slate-50 flex items-center justify-between">
-                    <div>
-                      <div className="font-bold text-slate-900 text-sm flex items-center space-x-2">
-                        <span>{v.visit_type}</span>
-                        {statusBadge}
-                      </div>
-                      <div className="text-xs text-slate-500 mt-1">Due Date: {v.due_date}</div>
-                      {v.note && <div className="text-xs text-slate-600 mt-1 italic">Note: "{v.note}"</div>}
-                    </div>
-
-                    <button
-                      onClick={() => handleManualNudge(v.visit_id)}
-                      className="px-3 py-1 text-xs font-semibold text-emerald-800 bg-emerald-100 hover:bg-emerald-200 rounded-lg transition"
-                    >
-                      Nudge
-                    </button>
-                  </div>
-                );
-              })}
-            </div>
-          )}
+          </section>
         </div>
 
-        {/* Family Consent & Access Manager (1 Col) */}
-        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-            <h3 className="text-base font-bold text-slate-900 flex items-center space-x-1.5">
-              <Users className="h-5 w-5 text-emerald-700" />
-              <span>Family Access (FR-016/017)</span>
-            </h3>
-            <button
-              onClick={() => setShowAddFamily(true)}
-              className="p-1 rounded bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition"
-              title="Add Consented Family Member"
-            >
-              <Plus className="h-4 w-4" />
-            </button>
-          </div>
+        <div>
+          <section className="border-t border-rule pt-6 mt-8">
+            <h2 className="text-base font-bold text-ink">Risk flags</h2>
+            {active_plan && active_plan.risk_flags.length > 0 ? (
+              <>
+                <p className="text-sm text-late font-semibold mt-3">
+                  {active_plan.risk_flags.map((rf) => riskNames[rf.flag_type] || rf.flag_type).join(', ')}
+                </p>
+                <p className="text-xs text-ink-faint mt-1">Extra checkups have been added to her schedule for these.</p>
+              </>
+            ) : (
+              <p className="text-sm text-ink-soft mt-3">None recorded. She follows the standard PNC schedule.</p>
+            )}
+          </section>
 
-          {family_members.length === 0 ? (
-            <p className="text-xs text-slate-500 italic">No secondary family member added yet.</p>
-          ) : (
-            <div className="space-y-3">
-              {family_members.map((fm) => (
-                <div key={fm.family_id} className="p-3 rounded-lg border border-slate-200 bg-slate-50 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <div className="font-semibold text-sm text-slate-900">{fm.name} ({fm.relation})</div>
-                    {fm.latest_consent ? (
-                      <span className="flex items-center text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded">
-                        <ShieldCheck className="h-3 w-3 mr-1" />
-                        Consent Active
-                      </span>
-                    ) : (
-                      <span className="flex items-center text-[10px] font-bold text-rose-700 bg-rose-100 px-2 py-0.5 rounded">
-                        <ShieldOff className="h-3 w-3 mr-1" />
-                        Revoked
-                      </span>
-                    )}
-                  </div>
-                  <div className="text-xs text-slate-500">{fm.contact_number}</div>
-
-                  <button
-                    onClick={() => handleToggleConsent(fm.family_id, fm.latest_consent)}
-                    className={`w-full text-xs font-semibold py-1 rounded transition ${
-                      fm.latest_consent
-                        ? 'bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200'
-                        : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200'
-                    }`}
-                  >
-                    {fm.latest_consent ? 'Revoke Consent' : 'Grant Consent'}
-                  </button>
-                </div>
-              ))}
+          <section className="border-t border-rule pt-6 mt-8">
+            <div className="flex items-center justify-between">
+              <h2 className="text-base font-bold text-ink">Family contacts</h2>
+              <button
+                onClick={() => setShowAddFamily(true)}
+                className="text-scrub text-sm font-semibold hover:underline underline-offset-2"
+              >
+                Add family member
+              </button>
             </div>
-          )}
+
+            {family_members.length === 0 ? (
+              <p className="text-sm text-ink-soft mt-3">
+                No family members added. Add one if she wants a relative to get her reminders too.
+              </p>
+            ) : (
+              <ul className="mt-3">
+                {family_members.map((fm) => (
+                  <li key={fm.family_id} className="py-3 border-b border-rule last:border-0 text-sm">
+                    <div className="font-semibold text-ink">
+                      {fm.name}, {fm.relation.toLowerCase()}
+                    </div>
+                    <div className="text-[13px] text-ink-soft mt-0.5">{fm.contact_number}</div>
+                    <div className="flex items-center justify-between mt-1">
+                      {fm.latest_consent ? (
+                        <span className="text-[13px] text-ok font-semibold">Agreed to receive reminders</span>
+                      ) : (
+                        <span className="text-[13px] text-late font-semibold">Consent withdrawn</span>
+                      )}
+                      <button
+                        onClick={() => handleToggleConsent(fm.family_id, fm.latest_consent)}
+                        className={`text-sm font-semibold hover:underline underline-offset-2 ${
+                          fm.latest_consent ? 'text-late' : 'text-scrub'
+                        }`}
+                      >
+                        {fm.latest_consent ? 'Withdraw consent' : 'Record consent'}
+                      </button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
         </div>
       </div>
 
-      {/* Add Family Member Modal */}
       {showAddFamily && (
-        <div className="fixed inset-0 bg-slate-900 bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6 border border-slate-200">
-            <h3 className="text-lg font-bold text-slate-900 mb-4">Add Consented Family Member</h3>
-            {fmError && <div className="mb-3 text-xs bg-red-50 text-red-700 p-2 rounded">{fmError}</div>}
+        <div className="fixed inset-0 bg-ink/40 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-md shadow-lg max-w-md w-full p-6">
+            <h2 className="text-lg font-bold text-ink mb-4">Add family member</h2>
+            {fmError && (
+              <div className="mb-4 border-l-4 border-late bg-late-tint text-late text-sm px-3 py-2">{fmError}</div>
+            )}
 
             <form onSubmit={handleAddFamilySubmit} className="space-y-4 text-sm">
               <div>
-                <label className="block text-xs font-semibold text-slate-700">Full Name</label>
+                <label className="block text-sm font-semibold text-ink">Name</label>
                 <input
                   type="text"
                   required
                   value={fmName}
                   onChange={(e) => setFmName(e.target.value)}
-                  placeholder="e.g. Ramesh Rao"
-                  className="mt-1 block w-full border border-slate-300 rounded-lg p-2 focus:ring-emerald-500 focus:border-emerald-500"
+                  placeholder="Ramesh Rao"
+                  className={inputClass}
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700">Relation to Mother</label>
+                <label className="block text-sm font-semibold text-ink">Relation to mother</label>
                 <select
                   value={fmRelation}
                   onChange={(e) => setFmRelation(e.target.value)}
-                  className="mt-1 block w-full border border-slate-300 rounded-lg p-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white"
+                  className={inputClass}
                 >
                   <option value="Husband">Husband</option>
                   <option value="Mother">Mother</option>
@@ -277,43 +263,44 @@ export default function PatientDetail() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700">Contact Number</label>
+                <label className="block text-sm font-semibold text-ink">Phone number</label>
                 <input
                   type="text"
                   required
                   value={fmContact}
                   onChange={(e) => setFmContact(e.target.value)}
                   placeholder="+919876543211"
-                  className="mt-1 block w-full border border-slate-300 rounded-lg p-2 focus:ring-emerald-500 focus:border-emerald-500"
+                  className={inputClass}
                 />
+                <p className="text-xs text-ink-faint mt-1">Include the country code, e.g. +91.</p>
               </div>
 
-              <div className="flex items-center space-x-2 pt-2">
+              <div className="flex items-start gap-2 pt-1">
                 <input
                   type="checkbox"
                   id="consent_check"
                   checked={fmConsent}
                   onChange={(e) => setFmConsent(e.target.checked)}
-                  className="h-4 w-4 text-emerald-600 rounded"
+                  className="h-4 w-4 mt-0.5 accent-scrub"
                 />
-                <label htmlFor="consent_check" className="text-xs font-medium text-slate-700">
-                  Verbal/Written Consent Captured (Opt-in for WhatsApp nudges)
+                <label htmlFor="consent_check" className="text-sm text-ink">
+                  They agreed, verbally or in writing, to get WhatsApp reminders about her checkups.
                 </label>
               </div>
 
-              <div className="flex justify-end space-x-3 pt-3 border-t border-slate-100">
+              <div className="flex justify-end gap-3 pt-4 border-t border-rule">
                 <button
                   type="button"
                   onClick={() => setShowAddFamily(false)}
-                  className="px-3 py-1.5 text-xs font-semibold text-slate-600 bg-slate-100 rounded-lg"
+                  className="bg-white border border-rule-strong text-ink text-sm font-semibold px-4 py-2 rounded hover:bg-paper"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-1.5 text-xs font-semibold text-white bg-emerald-700 rounded-lg shadow-sm"
+                  className="bg-scrub hover:bg-scrub-dark text-white text-sm font-semibold px-4 py-2 rounded"
                 >
-                  Save Contact
+                  Add family member
                 </button>
               </div>
             </form>

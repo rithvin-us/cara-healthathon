@@ -4,10 +4,37 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Cara — Postnatal Follow-Up Coordination Platform</title>
+    <meta name="theme-color" content="#0E5A54" />
+    <title>Cara postnatal follow-up</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap"
+      rel="stylesheet"
+    />
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['"Atkinson Hyperlegible Next"', 'system-ui', 'sans-serif'],
+            },
+            colors: {
+              paper: '#F5F6F4',
+              ink: { DEFAULT: '#1E2A2D', soft: '#4A5759', faint: '#7A8587' },
+              rule: { DEFAULT: '#D9DDD8', strong: '#B9C0BA' },
+              scrub: { DEFAULT: '#0E5A54', dark: '#0A4541', tint: '#E3EFEC' },
+              late: { DEFAULT: '#A8321F', tint: '#F7E6E2' },
+              soon: { DEFAULT: '#9A6700', tint: '#F6EDD9' },
+              ok: { DEFAULT: '#2F6B3A', tint: '#E4EFE4' },
+            },
+          },
+        },
+      };
+    </script>
   </head>
-  <body class="bg-slate-50 text-slate-900 min-h-screen">
+  <body class="bg-paper text-ink min-h-screen">
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

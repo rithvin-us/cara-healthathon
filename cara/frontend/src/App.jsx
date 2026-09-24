@@ -42,7 +42,7 @@ export default function App() {
 
   return (
     <BrowserRouter>
-      <div className="min-h-screen flex flex-col bg-slate-50 font-sans">
+      <div className="min-h-screen flex flex-col bg-paper font-sans text-ink">
         <Navbar
           user={user}
           setUser={setUser}
