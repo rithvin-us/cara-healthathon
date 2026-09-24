@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=sqlite:///./cara.db
+      - JWT_SECRET=production-secret-cara-key-2026
+      - TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID:-AC_sandbox}
+      - TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN:-token_sandbox}
+    volumes:
+      - ./backend/cara.db:/app/cara.db
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
