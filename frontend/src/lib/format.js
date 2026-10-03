@@ -63,5 +63,5 @@ export function formatPhone(value) {
   const s = String(value || '');
   const m = s.match(/^\+91(\d{5})(\d{5})$/);
   // Non-breaking spaces keep the number on one line.
-  return m ? `+91 ${m[1]} ${m[2]}` : s;
+  return m ? `+91\u00a0${m[1]}\u00a0${m[2]}` : s;
 }
