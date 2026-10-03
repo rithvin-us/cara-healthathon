@@ -1,0 +1,32 @@
+[project]
+name = "cara-api"
+version = "1.1.0"
+description = "Cara postnatal follow-up coordination API"
+requires-python = ">=3.11"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+filterwarnings = [
+    "ignore::DeprecationWarning:passlib.*",
+]
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+extend-exclude = [".venv"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "BLE"]
+ignore = [
+    "B008",  # FastAPI's Depends() in defaults is idiomatic
+    "E501",  # long strings in user-facing copy are fine; formatter handles code
+    "UP042", # str-mixin enums keep str() == value, which the API relies on
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["app"]
+
+[tool.coverage.run]
+source = ["app"]
+omit = ["app/seed.py"]

@@ -1,0 +1,75 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    font-family: "Atkinson Hyperlegible Next", "Noto Sans Devanagari", "Noto Sans Tamil", system-ui, sans-serif;
+    @apply bg-paper text-ink antialiased;
+    font-feature-settings: "tnum" 1;
+  }
+
+  :focus-visible {
+    outline: 2px solid theme("colors.scrub.DEFAULT");
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  .field {
+    @apply block w-full text-sm border border-rule-strong rounded px-3 py-2 bg-white text-ink placeholder:text-ink-faint focus:outline-none focus:border-scrub focus:ring-1 focus:ring-scrub disabled:bg-paper;
+  }
+
+  .label {
+    @apply block text-sm font-semibold text-ink mb-1;
+  }
+
+  .hint {
+    @apply text-xs text-ink-faint mt-1;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 bg-scrub hover:bg-scrub-dark text-white text-sm font-semibold px-4 py-2 rounded disabled:opacity-60 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 bg-white border border-rule-strong text-ink text-sm font-semibold px-4 py-2 rounded hover:bg-paper disabled:opacity-60 disabled:cursor-not-allowed;
+  }
+
+  .btn-link {
+    @apply text-scrub text-sm font-semibold hover:underline underline-offset-2 disabled:opacity-50 disabled:no-underline disabled:cursor-not-allowed;
+  }
+
+  .btn-danger-link {
+    @apply text-late text-sm font-semibold hover:underline underline-offset-2 disabled:opacity-50;
+  }
+
+  .card {
+    @apply bg-white border border-rule rounded-md;
+  }
+
+  .th {
+    @apply py-3 px-4 text-left text-[13px] font-semibold text-ink-soft;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}

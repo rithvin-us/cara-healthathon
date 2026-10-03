@@ -1,2 +1,37 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+coverage.xml
+
+# --- Node / frontend ---
+node_modules/
+frontend/dist/
+*.log
+npm-debug.log*
+
+# --- Local databases ---
+*.db
+*.sqlite
+*.sqlite3
+
+# --- Environment & secrets ---
+.env
+.env.*
+!.env.example
+!**/.env.example
+
+# --- Tooling ---
 .vercel
-.env*
+.idea/
+.vscode/*
+!.vscode/extensions.json
+.DS_Store
+Thumbs.db
